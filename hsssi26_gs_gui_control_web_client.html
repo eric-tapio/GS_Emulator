@@ -1,0 +1,1799 @@
+<!DOCTYPE HTML>
+<html>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAPE-Twiggs HSSSI26 SlimSat GS Emulator Web Client</title>
+	<style>
+        textarea {
+            width: 95%; /* Adjust as needed */
+            height: 200px; /* Adjust as needed */
+            font-size: 14px;
+            padding: 10px;
+            border: 2px solid #ccc;
+            resize: vertical; /* Allows vertical resizing by the user */
+        }
+		.right-aligned-text {
+			text-align: right;
+		}
+		.left-aligned-text {
+			text-align: left;
+		}
+		p {
+            font-family: Verdana, sans-serif;
+        }
+        h1 {
+            font-family: 'Courier New', monospace;
+        }
+		table {
+			border-spacing: 3px;
+		}
+		/* Custom fixed-size button */
+		.button-fixed {
+			width: 190px;
+			height: 22px;
+			font-size: 14px;
+			display: flex; /* For centering text vertically and horizontally */
+			align-items: center;
+			justify-content: center;
+		}
+		input[type="text"] {
+			width: 100px;
+			box-sizing: border-box;
+		}
+		.dropdown-content {
+			min-width: 150px; /* minimum width */
+			width: auto;      /* adjusts to content if wider than min-width */
+			white-space: nowrap; /* keeps options on a single line */
+		}
+
+    </style>
+    <script type="text/javascript" src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function(){
+            var socket = io.connect();
+                        
+            const HIGH_STATE = 1;
+			
+            socket.on('connect', function() {
+                socket.emit('my_event', {data: 1});
+            });
+            socket.on('disconnect', function() {
+                $('#log').append('<br>Disconnected');
+            });
+            //socket.on('my_response', function(msg) {
+            //    $('#log').append('<br>Received: ' + msg.data);
+            //});
+			socket.on('updateTime', function(msg) {
+                displayDate();
+            });
+			// Sc LoRa
+			socket.on('updateScFrequency', function(msg) {
+				document.getElementById("scFrequencyTextbox").value = msg.data;
+            });
+			socket.on('updateScBandwidth', function(msg) {
+				document.getElementById("scBandwidthTextbox").value = msg.data;
+            });
+			socket.on('updateScSpreadFactor', function(msg) {
+				document.getElementById("scSpreadFactorTextbox").value = msg.data;
+            });
+			socket.on('updateScCodingRate', function(msg) {
+				document.getElementById("scCodingRateTextbox").value = msg.data;
+            });
+			socket.on('updateScOutputPower', function(msg) {
+				document.getElementById("scOutputPowerTextbox").value = msg.data;
+            });			
+			socket.on('updateScCurrentLimit', function(msg) {
+				document.getElementById("scCurrentLimitTextbox").value = msg.data;
+            });
+			socket.on('updateScPreambleLength', function(msg) {
+				document.getElementById("scPreambleLengthTextbox").value = msg.data;
+            });
+			socket.on('updateScFrequencyError', function(msg) {
+				document.getElementById("scFrequencyErrorTextbox").value = msg.data;
+            });			
+			socket.on('updateScGain', function(msg) {
+				document.getElementById("scGainTextbox").value = msg.data;
+            });
+			socket.on('updateScSnr', function(msg) {
+				document.getElementById("scSnrTextbox").value = msg.data;
+            });
+			socket.on('updateScRssi', function(msg) {
+				document.getElementById("scRssiTextbox").value = msg.data;
+            });	
+			// Ground Station LoRa
+			socket.on('updateGsFrequency', function(msg) {
+				document.getElementById("gsFrequencyTextbox").value = msg.data;
+            });
+			socket.on('updateGsBandwidth', function(msg) {
+				document.getElementById("gsBandwidthTextbox").value = msg.data;
+            });
+			socket.on('updateGsSpreadFactor', function(msg) {
+				document.getElementById("gsSpreadFactorTextbox").value = msg.data;
+            });
+			socket.on('updateGsCodingRate', function(msg) {
+				document.getElementById("gsCodingRateTextbox").value = msg.data;
+            });
+			socket.on('updateGsOutputPower', function(msg) {
+				document.getElementById("gsOutputPowerTextbox").value = msg.data;
+            });			
+			socket.on('updateGsCurrentLimit', function(msg) {
+				document.getElementById("gsCurrentLimitTextbox").value = msg.data;
+            });
+			socket.on('updateGsPreambleLength', function(msg) {
+				document.getElementById("gsPreambleLengthTextbox").value = msg.data;
+            });
+			socket.on('updateGsFrequencyError', function(msg) {
+				document.getElementById("gsFrequencyErrorTextbox").value = msg.data;
+            });			
+			socket.on('updateGsGain', function(msg) {
+				document.getElementById("gsGainTextbox").value = msg.data;
+            });
+			socket.on('updateGsSnr', function(msg) {
+				document.getElementById("gsSnrTextbox").value = msg.data;
+            });			
+			socket.on('updateGsRssi', function(msg) {
+				document.getElementById("gsRssiTextbox").value = msg.data;	
+            });
+			// SC Data
+			socket.on('updateNumScBusDataRecs', function(msg) {
+				document.getElementById("scBusDataRecordsTextbox").value = msg.data;
+            });
+			socket.on('updateNumPlBusDataRecs', function(msg) {
+				document.getElementById("plBusDataRecordsTextbox").value = msg.data;
+            });	
+			socket.on('updateScBeaconPeriod', function(msg) {
+				document.getElementById("scBeaconPeriodTextbox").value = msg.data;
+            });			
+			socket.on('updateScBusMode', function(msg) {
+				document.getElementById("scBusModeTextbox").value = msg.data;
+            });
+			socket.on('updateScBusEpoch', function(msg) {
+				document.getElementById("scBusEpochTextbox").value = msg.data;
+            });
+			socket.on('updateScBusTime', function(msg) {
+				document.getElementById("scBusTimeTextbox").value = msg.data;
+            });			
+			socket.on('updateScBusData', function(msg) {
+				document.getElementById("scBusDataTextbox").value = msg.data;
+            });
+			socket.on('updateScPayloadOpPeriod', function(msg) {
+				document.getElementById("scPayloadOpPeriodTextbox").value = msg.data;
+            });
+			socket.on('updateTransmittedMsg', function(msg) {
+				document.getElementById("gsTransmittedMsgTextbox").value = msg.data;
+            });
+			socket.on('updateReceivededMsg', function(msg) {
+				document.getElementById("gsReceivedMsgTextbox").value = msg.data;
+            });
+			socket.on('updateReceivededBeaconResponse', function(msg) {
+				document.getElementById("gsReceivedBeaconMessageTextbox").value = msg.data;
+            });
+			socket.on('updateScBusSafeModeVoltage', function(msg) {
+				document.getElementById("scBusSafeModeVoltageTextbox").value = msg.data;
+            });
+			socket.on('updateScBusDataRecordPeriod', function(msg) {
+				document.getElementById("scBusDataRecordPeriodTextbox").value = msg.data;
+            });	
+			
+			socket.on('updateMessageLog', function(msg) {
+				const outputTextBox = document.getElementById('gsOutputTextBox');
+				outputTextBox.value += msg.data;
+				
+				// Optionally, scroll to the bottom to see new content
+				outputTextBox.scrollTop = outputTextBox.scrollHeight;
+            });				
+			socket.on('updateSerialPortDropdown', function(msg) {
+				let select = document.getElementById("serialPortDropdown");
+				//let elmts = [msg.data];
+				let elmts = msg.data;
+				
+				// Clear existing options (if any)
+				select.innerHTML = '';
+				//select.value = msg.data
+				$.each(elmts, function (i, p) {
+					$('#serialPortDropdown').append($('<option></option>')
+						.val(p).html(p));
+				});
+				
+				if (msg.data == 'None') {
+					disableOpenSerialPortButton();
+					//console.log("None Serial Port")
+				}
+				else {
+					enableOpenSerialPortButton();
+					//console.log("Not None Serial Port")
+				}
+            });		
+			
+			
+			document.getElementById("setScNumButton").addEventListener("click", setScNumber);
+			
+			document.getElementById("getScAllTelemetryButton").addEventListener("click", getAllScTelemetry);
+			document.getElementById("getGsAllLoraTelemetryButton").addEventListener("click", getGsAllLoraTelemetry);
+			document.getElementById("setGsAllLoraDefaultsButton").addEventListener("click", setGsAllLoraDefaults);
+			
+			// SC LoRa 
+			document.getElementById("setScFrequencyButton").addEventListener("click", setScFrequency);
+			document.getElementById("getScFrequencyButton").addEventListener("click", getScFrequency);
+			document.getElementById("setScBandwidthButton").addEventListener("click", setScBandwidth);
+			document.getElementById("getScBandwidthButton").addEventListener("click", getScBandwidth);
+			document.getElementById("setScSpreadFactorButton").addEventListener("click", setScSpreadFactor);
+			document.getElementById("getScSpreadFactorButton").addEventListener("click", getScSpreadFactor);
+			document.getElementById("setScCodingRateButton").addEventListener("click", setScCodingRate);
+			document.getElementById("getScCodingRateButton").addEventListener("click", getScCodingRate);
+			document.getElementById("setScOutputPowerButton").addEventListener("click", setScOutputPower);
+			document.getElementById("getScOutputPowerButton").addEventListener("click", getScOutputPower);
+			document.getElementById("setScCurrentLimitButton").addEventListener("click", setScCurrentLimit);
+			document.getElementById("getScCurrentLimitButton").addEventListener("click", getScCurrentLimit);
+			document.getElementById("setScPreambleLengthButton").addEventListener("click", setScPreambleLength);
+			document.getElementById("getScPreambleLengthButton").addEventListener("click", getScPreambleLength);
+			document.getElementById("setScGainButton").addEventListener("click", setScGain);
+			document.getElementById("getScGainButton").addEventListener("click", getScGain);
+			document.getElementById("getScFrequencyErrorButton").addEventListener("click", getScFrequencyError);	
+			document.getElementById("getScSnrButton").addEventListener("click", getScSnr);			
+			document.getElementById("getScRssiButton").addEventListener("click", getScRssi);
+			
+			// GS LoRa
+			document.getElementById("setGsFrequencyButton").addEventListener("click", setGsFrequency);
+			document.getElementById("getGsFrequencyButton").addEventListener("click", getGsFrequency);
+			document.getElementById("setGsBandwidthButton").addEventListener("click", setGsBandwidth);
+			document.getElementById("getGsBandwidthButton").addEventListener("click", getGsBandwidth);
+			document.getElementById("setGsSpreadFactorButton").addEventListener("click", setGsSpreadFactor);
+			document.getElementById("getGsSpreadFactorButton").addEventListener("click", getGsSpreadFactor);
+			document.getElementById("setGsCodingRateButton").addEventListener("click", setGsCodingRate);
+			document.getElementById("getGsCodingRateButton").addEventListener("click", getGsCodingRate);
+			document.getElementById("setGsOutputPowerButton").addEventListener("click", setGsOutputPower);
+			document.getElementById("getGsOutputPowerButton").addEventListener("click", getGsOutputPower);
+			document.getElementById("setGsCurrentLimitButton").addEventListener("click", setGsCurrentLimit);
+			document.getElementById("getGsCurrentLimitButton").addEventListener("click", getGsCurrentLimit);
+			document.getElementById("setGsPreambleLengthButton").addEventListener("click", setGsPreambleLength);
+			document.getElementById("getGsPreambleLengthButton").addEventListener("click", getGsPreambleLength);
+			document.getElementById("setGsGainButton").addEventListener("click", setGsGain);
+			document.getElementById("getGsGainButton").addEventListener("click", getGsGain);
+			document.getElementById("getGsFrequencyErrorButton").addEventListener("click", getGsFrequencyError);	
+			document.getElementById("getGsSnrButton").addEventListener("click", getGsSnr);			
+			document.getElementById("getGsRssiButton").addEventListener("click", getGsRssi);
+			
+			
+			document.getElementById("getScPingButton").addEventListener("click", getScPing);
+			document.getElementById("getScDbRegisterValuesButton").addEventListener("click", getScDbRegisterValues);
+			document.getElementById("setScBeaconPeriodButton").addEventListener("click", setScBeaconPeriod);
+			document.getElementById("getScBeaconPeriodButton").addEventListener("click", getScBeaconPeriod);
+			document.getElementById("setScBusModeButton").addEventListener("click", setScBusMode);
+			document.getElementById("getScBusModeButton").addEventListener("click", getScBusMode);
+			document.getElementById("setScBusEpochButton").addEventListener("click", setScBusEpoch);
+			document.getElementById("getScBusEpochButton").addEventListener("click", getScBusEpoch);
+			document.getElementById("getScBusTimeButton").addEventListener("click", getScBusTime);
+			//document.getElementById("getScBusDataButton").addEventListener("click", getScBusData);
+			document.getElementById("setScPayloadOpPeriodButton").addEventListener("click", setScPayloadOpPeriod);
+			document.getElementById("getScPayloadOpPeriodButton").addEventListener("click", getScPayloadOpPeriod);			
+			
+			document.getElementById("gsClearTextButton").addEventListener("click", clearText);
+			document.getElementById("getAvailSerialPortsButton").addEventListener("click", getAvailSerialPorts);
+			document.getElementById("openSerialPortButton").addEventListener("click", getSelectedSerialPortParameters);
+			document.getElementById("closeSerialPortButton").addEventListener("click", closeSerialPort);
+		
+			document.getElementById("getScDataRecordsButton").addEventListener("click", getScDataRecords);
+			document.getElementById("getPlDataRecordsButton").addEventListener("click", getPlDataRecords);
+			document.getElementById("getScBusSafeModeVoltageButton").addEventListener("click", getScBusSafeModeVoltage);
+			document.getElementById("setScBusSafeModeVoltageButton").addEventListener("click", setScBusSafeModeVoltage);
+			document.getElementById("getScBusDataRecordPeriodButton").addEventListener("click", getScBusDataRecordPeriod);
+			document.getElementById("setScBusDataRecordPeriodButton").addEventListener("click", setScBusDataRecordPeriod);
+			
+			
+			document.getElementById("getScGpsPositionButton").addEventListener("click", getScGpsPosition);
+			document.getElementById("performScCutdownButton").addEventListener("click", performScCutdown);
+			document.getElementById("performScRebootButton").addEventListener("click", performScReboot);
+			document.getElementById("performScFlashChipEraseButton").addEventListener("click", performScFlashChipErase);
+
+
+			
+			function setScNumber() {
+				getSelectedScNumber();
+			};			
+			
+			function displayDate() {
+				document.getElementById("gsDateTimeText").innerHTML = Date();
+			};
+			
+			function getAllScTelemetry() {
+				socket.emit('getAllScTelemetry');
+			};
+			
+			function getGsAllLoraTelemetry() {
+				socket.emit('getGsAllLoraTelemetry');
+			};
+			
+			function setGsAllLoraDefaults() {
+				socket.emit('setGsAllLoraDefaults');
+			};
+			
+			// SC LoRa
+			function setScFrequency() {
+				socket.emit('setScFrequency', {data: setScFrequencyTextbox.value});
+			};
+
+			function getScFrequency() {
+				socket.emit('getScFrequency');
+			};
+
+			function setScBandwidth() {
+				getSelectedScBandwidth();
+			};
+
+			function getScBandwidth() {
+				socket.emit('getScBandwidth');
+			};
+
+			function setScSpreadFactor() {
+				socket.emit('setScSpreadFactor', {data: setScSpreadFactorTextbox.value});
+			};
+
+			function getScSpreadFactor() {
+				socket.emit('getScSpreadFactor');
+			};
+
+			function setScCodingRate() {
+				socket.emit('setScCodingRate', {data: setScCodingRateTextbox.value});
+			};
+
+			function getScCodingRate() {
+				socket.emit('getScCodingRate');
+			};
+
+			function setScOutputPower() {
+				socket.emit('setScOutputPower', {data: setScOutputPowerTextbox.value});
+			};
+
+			function getScOutputPower() {
+				socket.emit('getScOutputPower');
+			};
+
+			function setScCurrentLimit() {
+				socket.emit('setScCurrentLimit', {data: setScCurrentLimitTextbox.value});
+			};
+
+			function getScCurrentLimit() {
+				socket.emit('getScCurrentLimit');
+			};
+
+			function setScPreambleLength() {
+				socket.emit('setScPreambleLength', {data: setScPreambleLengthTextbox.value});
+			};
+
+			function getScPreambleLength() {
+				socket.emit('getScPreambleLength');
+			};
+
+			function setScGain() {
+				socket.emit('setScGain', {data: setScGainTextbox.value});
+			};
+
+			function getScGain() {
+				socket.emit('getScGain');
+			};
+
+			function getScFrequencyError() {
+				socket.emit('getScFrequencyError');
+			};
+
+			function getScSnr() {
+				socket.emit('getScSnr');
+			};
+
+			function getScRssi() {
+				socket.emit('getScRssi');
+			};
+
+			// GS LoRa
+			function setGsFrequency() {
+				socket.emit('setGsFrequency', {data: setGsFrequencyTextbox.value});
+			};
+
+			function getGsFrequency() {
+				socket.emit('getGsFrequency');
+			};
+
+			function setGsBandwidth() {
+				getSelectedGsBandwidth();
+			};
+
+			function getGsBandwidth() {
+				socket.emit('getGsBandwidth');
+			};
+
+			function setGsSpreadFactor() {
+				socket.emit('setGsSpreadFactor', {data: setGsSpreadFactorTextbox.value});
+			};
+
+			function getGsSpreadFactor() {
+				socket.emit('getGsSpreadFactor');
+			};
+
+			function setGsCodingRate() {
+				socket.emit('setGsCodingRate', {data: setGsCodingRateTextbox.value});
+			};
+
+			function getGsCodingRate() {
+				socket.emit('getGsCodingRate');
+			};
+
+			function setGsOutputPower() {
+				socket.emit('setGsOutputPower', {data: setGsOutputPowerTextbox.value});
+			};
+
+			function getGsOutputPower() {
+				socket.emit('getGsOutputPower');
+			};
+
+			function setGsCurrentLimit() {
+				socket.emit('setGsCurrentLimit', {data: setGsCurrentLimitTextbox.value});
+			};
+
+			function getGsCurrentLimit() {
+				socket.emit('getGsCurrentLimit');
+			};
+
+			function setGsPreambleLength() {
+				socket.emit('setGsPreambleLength', {data: setGsPreambleLengthTextbox.value});
+			};
+
+			function getGsPreambleLength() {
+				socket.emit('getGsPreambleLength');
+			};
+
+			function setGsGain() {
+				socket.emit('setGsGain', {data: setGsGainTextbox.value});
+			};
+
+			function getGsGain() {
+				socket.emit('getGsGain');
+			};
+
+			
+			function getGsFrequencyError() {
+				socket.emit('getGsFrequencyError');
+			};
+
+			function getGsSnr() {
+				socket.emit('getGsSnr');
+			};
+
+			function getGsRssi() {
+				socket.emit('getGsRssi');
+			};
+
+			// S/C Bus
+			function getScPing() {
+				socket.emit('getScPing');
+			};
+			
+			function getScDbRegisterValues() {
+				socket.emit('getScDbRegisterValues');
+			};
+
+			function getScDataRecords() {
+				socket.emit('getScDataRecords', {data: [setScDataRecordStartTextbox.value, setNumberOfScDataRecordsTextbox.value] });
+			};
+
+			function getPlDataRecords() {
+				socket.emit('getPlDataRecords', {data: [setPlDataRecordStartTextbox.value, setNumberOfPlDataRecordsTextbox.value] });
+			};
+
+			function setScBusSafeModeVoltage() {
+				socket.emit('setScGain', {data: setScBusSafeModeVoltage.value});
+			};
+
+			function getScBusSafeModeVoltage() {
+				socket.emit('getScBusSafeModeVoltage');
+			};
+
+			function setScBusDataRecordPeriod() {
+				socket.emit('setScBusDataRecordPeriod', {data: setScBusDataRecordPeriodTextbox.value});
+			};
+
+			function getScBusDataRecordPeriod() {
+				socket.emit('getScBusDataRecordPeriod');
+			};
+			
+			function setScBeaconPeriod() {
+				socket.emit('setScBeaconPeriod', {data: setScBeaconPeriodTextbox.value});
+			};
+
+			function getScBeaconPeriod() {
+				socket.emit('getScBeaconPeriod');
+			};
+
+			function setScBusMode() {
+				socket.emit('setScBusMode', {data: setScBusModeTextbox.value});
+			};
+
+			function getScBusMode() {
+				socket.emit('getScBusMode');
+			};
+
+			function setScBusEpoch() {
+				socket.emit('setScBusEpoch', {data: setScBusEpochTextbox.value});
+			};
+
+			function getScBusEpoch() {
+				socket.emit('getScBusEpoch');
+			};
+
+			function getScBusTime() {
+				socket.emit('getScBusTime');
+			};
+
+			function getScBusData() {
+				socket.emit('getScBusData');
+			};
+
+			function setScPayloadOpPeriod() {
+				socket.emit('setScPayloadOpPeriod', {data: setScPayloadOpPeriodTextbox.value});
+			};
+
+			function getScPayloadOpPeriod() {
+				socket.emit('getScPayloadOpPeriod');
+			};
+			
+			function getScGpsPosition() {
+				socket.emit('getScGpsPosition');
+			};
+
+			function performScCutdown() {
+				socket.emit('performScCutdown');
+			};
+
+			function performScReboot() {
+				socket.emit('performScReboot');
+			};
+			
+			function performScFlashChipErase() {
+				socket.emit('performScFlashChipErase');
+			};
+			
+			function closeSerialPort() {
+				socket.emit('closeSerialPort');
+				disableCloseSerialPortButton();
+				document.getElementById("serialPortStatus").value = "Closed";
+				enableOpenSerialPortButton();
+			};
+			
+			function displayValue() {
+				// Get the input element by its ID
+				const textbox = document.getElementById('myTextbox');
+
+				// Get the value entered in the textbox
+				const enteredValue = textbox.value;
+
+				// Get the output paragraph element
+				const outputParagraph = document.getElementById('output');
+
+				// Display the value in the output paragraph
+				if (enteredValue) {
+					outputParagraph.innerText = "Hello, " + enteredValue + "!";
+				} else {
+					outputParagraph.innerText = "Please enter your name.";
+				}
+			};
+			
+			function setValue() {
+				// Get the input element by its ID
+				document.getElementById('setFrequencyTextbox').value = "1234";
+			};
+			
+		    const outputTextBox = document.getElementById('gsOutputTextBox');
+
+			function addText() {
+				const newText = "This is some new text to add to the large text box. You can add multiple lines and longer paragraphs here.\n";
+				outputTextBox.value += newText;
+				// Optionally, scroll to the bottom to see new content
+				outputTextBox.scrollTop = outputTextBox.scrollHeight;
+			}
+
+			function addMessage(new_message) {
+				//const newText = "This is some new text to add to the large text box. You can add multiple lines and longer paragraphs here.\n";
+				outputTextBox.value += new_message;
+				// Optionally, scroll to the bottom to see new content
+				outputTextBox.scrollTop = outputTextBox.scrollHeight;
+			}
+			
+			function clearText() {
+				outputTextBox.value = "";
+			}
+
+			function getSelectedSerialPortParameters() {
+				const portDropdown = document.getElementById("serialPortDropdown");
+				const selectedPort = portDropdown.value;
+				const rateDropdown = document.getElementById("serialPortDataRatesDropdown");
+				const selectedRate = rateDropdown.value;				
+				
+				socket.emit('openSerialPort', {data: [selectedPort, selectedRate]});
+				
+				document.getElementById("serialPortStatus").value = "Open";
+				disableOpenSerialPortButton();
+				enableCloseSerialPortButton();
+				enableAllButtons();
+			}
+			
+			function getAvailSerialPorts() {
+				socket.emit('getAvailSerialPorts');
+				populateSerialPortDataRates();
+				//enableOpenSerialPortButton();
+			}
+
+			function populateSerialPortDataRates() {				
+				const dropdown = document.getElementById("serialPortDataRatesDropdown");
+				const data_rates = ["115200", "9600"];
+				dropdown.innerHTML = "";
+				data_rates.forEach(rate => {
+					const option = document.createElement("option");
+					option.textContent = rate;
+					dropdown.appendChild(option);
+				});
+			}
+
+			function disableOpenSerialPortButton() {
+				const button = document.getElementById('openSerialPortButton');
+				button.disabled = true;
+				//console.log("openSerialPortButton has been disabled.");
+			}
+			
+			function enableOpenSerialPortButton() {
+				const button = document.getElementById('openSerialPortButton');
+				button.disabled = false;
+				//console.log("openSerialPortButton has been enabled.");
+			}
+			
+			function disableCloseSerialPortButton() {
+				const button = document.getElementById('closeSerialPortButton');
+				button.disabled = true;
+				//console.log("openSerialPortButton has been disabled.");
+			}
+			
+			function enableCloseSerialPortButton() {
+				const button = document.getElementById('closeSerialPortButton');
+				button.disabled = false;
+				//console.log("openSerialPortButton has been enabled.");
+			}
+
+			function populateScBandwidthDropdown() {				
+				const dropdown = document.getElementById("scBandwidthDropdown");
+				const bandwidth_values = ["7800", "10400", "15600", "20800", "31250", "41700", "62500", "125000", "250000", "500000"];
+				dropdown.innerHTML = "";
+				bandwidth_values.forEach(value => {
+					const option = document.createElement("option");
+					option.textContent = value;
+					dropdown.appendChild(option);
+				});
+			}
+			
+			function enableScBandwidthDropdown() {
+				const button = document.getElementById('scBandwidthDropdown');
+				button.disabled = false;
+			}
+			
+			function disableScBandwidthDropdown() {
+				const button = document.getElementById('scBandwidthDropdown');
+				button.disabled = true;
+			}
+			
+			function getSelectedScBandwidth() {
+				const bandwidthDropdown = document.getElementById("scBandwidthDropdown");
+				const selected_bandwidth = bandwidthDropdown.value;
+				//console.log(selected_bandwidth);
+				socket.emit('setScBandwidth', {data: selected_bandwidth});
+			}
+
+			function populateGsBandwidthDropdown() {				
+				const dropdown = document.getElementById("gsBandwidthDropdown");
+				const bandwidth_values = ["7800", "10400", "15600", "20800", "31250", "41700", "62500", "125000", "250000", "500000"];
+				dropdown.innerHTML = "";
+				bandwidth_values.forEach(value => {
+					const option = document.createElement("option");
+					option.textContent = value;
+					dropdown.appendChild(option);
+				});
+			}
+			
+			function enableGsBandwidthDropdown() {
+				const button = document.getElementById('gsBandwidthDropdown');
+				button.disabled = false;
+			}
+			
+			function disableGsBandwidthDropdown() {
+				const button = document.getElementById('gsBandwidthDropdown');
+				button.disabled = true;
+			}
+
+			function getSelectedGsBandwidth() {
+				const bandwidthDropdown = document.getElementById("gsBandwidthDropdown");
+				const selected_bandwidth = bandwidthDropdown.value;
+				//console.log(selected_bandwidth);
+				socket.emit('setGsBandwidth', {data: selected_bandwidth});
+			}
+			
+			function populateScNumberDropdown() {				
+				const dropdown = document.getElementById("scNumDropdown");
+				const num_values = ["1", "2", "3"];
+				dropdown.innerHTML = "";
+				num_values.forEach(num => {
+					const option = document.createElement("option");
+					option.textContent = num;
+					dropdown.appendChild(option);
+				});
+			}
+
+			function enableScNumberDropdown() {
+				const button = document.getElementById('scNumDropdown');
+				button.disabled = false;
+			}
+			
+			function disableScNumberDropdown() {
+				const button = document.getElementById('scNumDropdown');
+				button.disabled = true;
+			}
+			
+			function getSelectedScNumber() {
+				const numberDropdown = document.getElementById("scNumDropdown");
+				const selected_number = numberDropdown.value;
+				//console.log(selected_bandwidth);
+				socket.emit('setScNumber', {data: selected_number});
+			}
+			
+			function disableAllButtons() {
+				document.getElementById("setScNumButton").disabled = true;		
+				document.getElementById("getScAllTelemetryButton").disabled = true;
+				document.getElementById("getGsAllLoraTelemetryButton").disabled = true;
+				document.getElementById("setGsAllLoraDefaultsButton").disabled = true;
+				document.getElementById("setScFrequencyButton").disabled = true;
+				document.getElementById("getScFrequencyButton").disabled = true;
+				document.getElementById("setScBandwidthButton").disabled = true;
+				document.getElementById("getScBandwidthButton").disabled = true;
+				document.getElementById("setScSpreadFactorButton").disabled = true;
+				document.getElementById("getScSpreadFactorButton").disabled = true;
+				document.getElementById("setScCodingRateButton").disabled = true;
+				document.getElementById("getScCodingRateButton").disabled = true;
+				document.getElementById("setScOutputPowerButton").disabled = true;
+				document.getElementById("getScOutputPowerButton").disabled = true;
+				document.getElementById("setScCurrentLimitButton").disabled = true;
+				document.getElementById("getScCurrentLimitButton").disabled = true;
+				document.getElementById("setScPreambleLengthButton").disabled = true;
+				document.getElementById("getScPreambleLengthButton").disabled = true;
+				document.getElementById("setScGainButton").disabled = true;
+				document.getElementById("getScGainButton").disabled = true;
+				document.getElementById("getScFrequencyErrorButton").disabled = true;	
+				document.getElementById("getScSnrButton").disabled = true;		
+				document.getElementById("getScRssiButton").disabled = true;
+				document.getElementById("setGsFrequencyButton").disabled = true;
+				document.getElementById("getGsFrequencyButton").disabled = true;
+				document.getElementById("setGsBandwidthButton").disabled = true;
+				document.getElementById("getGsBandwidthButton").disabled = true;
+				document.getElementById("setGsSpreadFactorButton").disabled = true;
+				document.getElementById("getGsSpreadFactorButton").disabled = true;
+				document.getElementById("setGsCodingRateButton").disabled = true;
+				document.getElementById("getGsCodingRateButton").disabled = true;
+				document.getElementById("setGsOutputPowerButton").disabled = true;
+				document.getElementById("getGsOutputPowerButton").disabled = true;
+				document.getElementById("setGsCurrentLimitButton").disabled = true;
+				document.getElementById("getGsCurrentLimitButton").disabled = true;
+				document.getElementById("setGsPreambleLengthButton").disabled = true;
+				document.getElementById("getGsPreambleLengthButton").disabled = true;
+				document.getElementById("setGsGainButton").disabled = true;
+				document.getElementById("getGsGainButton").disabled = true;
+				document.getElementById("getGsFrequencyErrorButton").disabled = true;
+				document.getElementById("getGsSnrButton").disabled = true;			
+				document.getElementById("getGsRssiButton").disabled = true;
+				document.getElementById("getScPingButton").disabled = true;
+				document.getElementById("getScDbRegisterValuesButton").disabled = true;
+				document.getElementById("setScBeaconPeriodButton").disabled = true;
+				document.getElementById("getScBeaconPeriodButton").disabled = true;
+				document.getElementById("setScBusModeButton").disabled = true;
+				document.getElementById("getScBusModeButton").disabled = true;
+				document.getElementById("setScBusEpochButton").disabled = true;
+				document.getElementById("getScBusEpochButton").disabled = true;
+				document.getElementById("getScBusTimeButton").disabled = true;
+				document.getElementById("setScPayloadOpPeriodButton").disabled = true;
+				document.getElementById("getScPayloadOpPeriodButton").disabled = true;		
+				document.getElementById("gsClearTextButton").disabled = true;		
+				document.getElementById("getScDataRecordsButton").disabled = true;
+				document.getElementById("getPlDataRecordsButton").disabled = true;
+				document.getElementById("getScBusSafeModeVoltageButton").disabled = true;
+				document.getElementById("setScBusSafeModeVoltageButton").disabled = true;
+				document.getElementById("getScBusDataRecordPeriodButton").disabled = true;
+				document.getElementById("setScBusDataRecordPeriodButton").disabled = true;
+				document.getElementById("getScGpsPositionButton").disabled = true;
+				document.getElementById("performScCutdownButton").disabled = true;
+				document.getElementById("performScRebootButton").disabled = true;
+				document.getElementById("performScFlashChipEraseButton").disabled = true;
+			}
+			
+			function enableAllButtons() {
+				document.getElementById("setScNumButton").disabled = false;		
+				document.getElementById("getScAllTelemetryButton").disabled = false;
+				document.getElementById("getGsAllLoraTelemetryButton").disabled = false;
+				document.getElementById("setGsAllLoraDefaultsButton").disabled = false;
+				document.getElementById("setScFrequencyButton").disabled = false;
+				document.getElementById("getScFrequencyButton").disabled = false;
+				document.getElementById("setScBandwidthButton").disabled = false;
+				document.getElementById("getScBandwidthButton").disabled = false;
+				document.getElementById("setScSpreadFactorButton").disabled = false;
+				document.getElementById("getScSpreadFactorButton").disabled = false;
+				document.getElementById("setScCodingRateButton").disabled = false;
+				document.getElementById("getScCodingRateButton").disabled = false;
+				document.getElementById("setScOutputPowerButton").disabled = false;
+				document.getElementById("getScOutputPowerButton").disabled = false;
+				document.getElementById("setScCurrentLimitButton").disabled = false;
+				document.getElementById("getScCurrentLimitButton").disabled = false;
+				document.getElementById("setScPreambleLengthButton").disabled = false;
+				document.getElementById("getScPreambleLengthButton").disabled = false;
+				document.getElementById("setScGainButton").disabled = false;
+				document.getElementById("getScGainButton").disabled = false;
+				document.getElementById("getScFrequencyErrorButton").disabled = false;	
+				document.getElementById("getScSnrButton").disabled = false;		
+				document.getElementById("getScRssiButton").disabled = false;
+				document.getElementById("setGsFrequencyButton").disabled = false;
+				document.getElementById("getGsFrequencyButton").disabled = false;
+				document.getElementById("setGsBandwidthButton").disabled = false;
+				document.getElementById("getGsBandwidthButton").disabled = false;
+				document.getElementById("setGsSpreadFactorButton").disabled = false;
+				document.getElementById("getGsSpreadFactorButton").disabled = false;
+				document.getElementById("setGsCodingRateButton").disabled = false;
+				document.getElementById("getGsCodingRateButton").disabled = false;
+				document.getElementById("setGsOutputPowerButton").disabled = false;
+				document.getElementById("getGsOutputPowerButton").disabled = false;
+				document.getElementById("setGsCurrentLimitButton").disabled = false;
+				document.getElementById("getGsCurrentLimitButton").disabled = false;
+				document.getElementById("setGsPreambleLengthButton").disabled = false;
+				document.getElementById("getGsPreambleLengthButton").disabled = false;
+				document.getElementById("setGsGainButton").disabled = false;
+				document.getElementById("getGsGainButton").disabled = false;
+				document.getElementById("getGsFrequencyErrorButton").disabled = false;
+				document.getElementById("getGsSnrButton").disabled = false;			
+				document.getElementById("getGsRssiButton").disabled = false;
+				document.getElementById("getScPingButton").disabled = false;
+				document.getElementById("getScDbRegisterValuesButton").disabled = false;
+				document.getElementById("setScBeaconPeriodButton").disabled = false;
+				document.getElementById("getScBeaconPeriodButton").disabled = false;
+				document.getElementById("setScBusModeButton").disabled = false;
+				document.getElementById("getScBusModeButton").disabled = false;
+				document.getElementById("setScBusEpochButton").disabled = false;
+				document.getElementById("getScBusEpochButton").disabled = false;
+				document.getElementById("getScBusTimeButton").disabled = false;
+				document.getElementById("setScPayloadOpPeriodButton").disabled = false;
+				document.getElementById("getScPayloadOpPeriodButton").disabled = false;		
+				document.getElementById("gsClearTextButton").disabled = false;		
+				document.getElementById("getScDataRecordsButton").disabled = false;
+				document.getElementById("getPlDataRecordsButton").disabled = false;
+				document.getElementById("getScBusSafeModeVoltageButton").disabled = false;
+				document.getElementById("setScBusSafeModeVoltageButton").disabled = false;
+				document.getElementById("getScBusDataRecordPeriodButton").disabled = false;
+				document.getElementById("setScBusDataRecordPeriodButton").disabled = false;				
+				document.getElementById("getScGpsPositionButton").disabled = false;
+				document.getElementById("performScCutdownButton").disabled = false;
+				document.getElementById("performScRebootButton").disabled = false;
+				document.getElementById("performScFlashChipEraseButton").disabled = false;
+			}
+			
+			// Initial text when the page loads
+			outputTextBox.value = "Open a Serial Port to get started.\n";
+			disableOpenSerialPortButton();
+			disableCloseSerialPortButton();
+			populateScBandwidthDropdown();
+			populateScNumberDropdown();
+			populateGsBandwidthDropdown();
+			disableAllButtons();
+			//disableScBandwidthDropdown();
+        });
+    </script>
+</head>
+<body>
+    <h1>CAPE-Twiggs HSSSI-26 SlimSat GS Emulator Web Client</h1>
+
+	<p class="left-aligned-text" id="gsDateTimeText"><b>Time</b></p>
+	<!--<h2>SlimSat w/ PING))) Payload</h2> -->
+	
+	<table style="width:100%" border ="2">
+		<tr>
+			<th style="width:65%">Control Panel</th>
+			<th style="width:35%">Display Panel</th> 
+		</tr>
+		<tr>
+			<td>
+				<table style="width:100%" border ="1">
+					<tr>    
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<!-- <input type="text" id="setScNumTextbox" placeholder="#"> -->
+										<select id="scNumDropdown">
+											<option>#</option>
+										</select>
+									</td>
+									<td>
+										<button class="button-fixed" id="setScNumButton">Set SlimSat Num.</button>
+									</td>
+								</tr>
+							</table>	
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScAllTelemetryButton">Get All SC Bus Tlm.</button></center>
+						</td>
+						<td>
+						</td>
+						<td>
+						</td>
+					</tr>
+					<tr>
+						<th style="font-family:courier;">SC Bus LoRa Set Commands</th>
+						<th style="font-family:courier;">SC Bus LoRa Get Commands</th>
+						<th></th>
+						<th style="font-family:courier;">SC Bus LoRa Telemetry</th>
+					</tr>
+					<tr>    
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<input type="text" id="setScFrequencyTextbox" placeholder="Hz">
+									</td>
+									<td>
+										<button class="button-fixed" id="setScFrequencyButton">Set Frequency</button>
+									</td>
+								</tr>
+							</table>	
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScFrequencyButton">Get Frequency</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">Frequency:</div>
+						</td>
+						<td>
+							<input type="text" id="scFrequencyTextbox" placeholder="Hz">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<select id="scBandwidthDropdown">
+											<option>Hz</option>
+										</select>
+									</td>
+									<td>
+										<button class="button-fixed" id="setScBandwidthButton">Set Bandwidth</button>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScBandwidthButton">Get Bandwidth</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">Bandwidth:</div>
+						</td>
+						<td>
+							<input type="text" id="scBandwidthTextbox" placeholder="Hz">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<input type="text" id="setScSpreadFactorTextbox" placeholder="">
+									</td>
+									<td>
+										<button class="button-fixed" id="setScSpreadFactorButton">Set Spread Factor</button>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScSpreadFactorButton">Get Spread Factor</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">Spread Factor:</div>
+						</td>
+						<td>
+							<input type="text" id="scSpreadFactorTextbox" placeholder="">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<input type="text" id="setScCodingRateTextbox" placeholder="">
+									</td>
+									<td>
+										<button class="button-fixed" id="setScCodingRateButton">Set Coding Rate</button>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScCodingRateButton">Get Coding Rate</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">Coding Rate:</div>
+						</td>
+						<td>
+							<input type="text" id="scCodingRateTextbox" placeholder="">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<input type="text" id="setScOutputPowerTextbox" placeholder="dBm">
+									</td>
+									<td>
+										<button class="button-fixed" id="setScOutputPowerButton">Set Output Power</button>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScOutputPowerButton">Get Output Power</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">Output Power:</div>
+						</td>
+						<td>
+							<input type="text" id="scOutputPowerTextbox" placeholder="dBm">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<input type="text" id="setScCurrentLimitTextbox" placeholder="mA">
+									</td>
+									<td>
+										<button class="button-fixed" id="setScCurrentLimitButton">Set Current Limit</button>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScCurrentLimitButton">Get Current Limit</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">Current Limit:</div>
+						</td>
+						<td>
+							<input type="text" id="scCurrentLimitTextbox" placeholder="mA">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<input type="text" id="setScPreambleLengthTextbox" placeholder="">
+									</td>
+									<td>
+										<button class="button-fixed" id="setScPreambleLengthButton">Set Preamble Length</button>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScPreambleLengthButton">Get Preamble Length</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">Preamble Length:</div>
+						</td>
+						<td>
+							<input type="text" id="scPreambleLengthTextbox" placeholder="">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<input type="text" id="setScGainTextbox" placeholder="">
+									</td>
+									<td>
+										<button class="button-fixed" id="setScGainButton">Set Gain</button>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScGainButton">Get Gain</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">Gain:</div>
+						</td>
+						<td>
+							<input type="text" id="scGainTextbox" placeholder="">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScFrequencyErrorButton">Get Frequency Error</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">Frequency Error:</div>
+						</td>
+						<td>
+							<input type="text" id="scFrequencyErrorTextbox" placeholder="Hz">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScSnrButton">Get SNR</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">SNR:</div>
+						</td>
+						<td>
+							<input type="text" id="scSnrTextbox" placeholder="">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScRssiButton">Get RSSI</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">RSSI:</div>
+						</td>
+						<td>
+							<input type="text" id="scRssiTextbox" placeholder="">
+						</td>
+					</tr>
+					
+					<tr>
+						<th style="font-family:courier;">SC Bus Set Commands</th>
+						<th style="font-family:courier;">SC Bus Get Commands</th>
+						<th></th>
+						<th style="font-family:courier;">SC Bus Telemetry</th>
+					</tr>
+					<tr>
+						<td>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScPingButton">Ping S/C Bus</button></center>
+						</td>
+						<td>
+						</td>
+						<td>
+					</tr>
+					<tr>
+						<td>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScDbRegisterValuesButton">Get # of Records</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">Num. Bus Records:</div>
+						</td>
+						<td>
+							<input type="text" id="scBusDataRecordsTextbox" placeholder="#">
+						</td>
+					</tr>
+					<tr>
+						<td>
+						</td>
+						<td>
+						</td>
+						<td>
+							<div class="right-aligned-text">Num. Payload Records:</div>
+						</td>
+						<td>
+							<input type="text" id="plBusDataRecordsTextbox" placeholder="#">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<input type="text" id="setScDataRecordStartTextbox" placeholder="Rec. start #">
+									</td>
+									<td>
+										<input type="text" id="setNumberOfScDataRecordsTextbox" placeholder="# Recs.">
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScDataRecordsButton">Get Bus Record(s)</button></center>
+						</td>
+						<td>
+						</td>
+						<td>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<input type="text" id="setPlDataRecordStartTextbox" placeholder="Rec. start #">
+									</td>
+									<td>
+										<input type="text" id="setNumberOfPlDataRecordsTextbox" placeholder="# Recs.">
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getPlDataRecordsButton">Get Payload Record(s)</button></center>
+						</td>
+						<td>
+						</td>
+						<td>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<input type="text" id="setScBeaconPeriodTextbox" placeholder="ms">
+									</td>
+									<td>
+										<button class="button-fixed" id="setScBeaconPeriodButton">Set Beacon Period</button>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScBeaconPeriodButton">Get Beacon Period</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">Beacon Period:</div>
+						</td>
+						<td>
+							<input type="text" id="scBeaconPeriodTextbox" placeholder="ms">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<input type="text" id="setScBusModeTextbox" placeholder="">
+									</td>
+									<td>
+										<button class="button-fixed" id="setScBusModeButton">Set SC Bus Mode</button>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScBusModeButton">Get SC Bus Mode</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">SC Bus Mode:</div>
+						</td>
+						<td>
+							<input type="text" id="scBusModeTextbox" placeholder="">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<input type="text" id="setScBusEpochTextbox" placeholder="sec">
+									</td>
+									<td>
+										<button class="button-fixed" id="setScBusEpochButton">Set SC Bus Epoch Time</button>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScBusEpochButton">Get SC Bus Epoch Time</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">SC Bus Epoch Time:</div>
+						</td>
+						<td>
+							<input type="text" id="scBusEpochTextbox" placeholder="sec">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScBusTimeButton">Get SC Bus Time</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">SC Bus Time:</div>
+						</td>
+						<td>
+							<input type="text" id="scBusTimeTextbox" placeholder="sec">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<input type="text" id="setScBusSafeModeVoltageTextbox" placeholder="mV">
+									</td>
+									<td>
+										<button class="button-fixed" id="setScBusSafeModeVoltageButton">Set Bus Safe-Mode Voltage</button>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScBusSafeModeVoltageButton">Get Bus Safe-Mode Voltage</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">Bus Safe-Mode Voltage:</div>
+						</td>
+						<td>
+							<input type="text" id="scBusSafeModeVoltageTextbox" placeholder="mV">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<input type="text" id="setScBusDataRecordPeriodTextbox" placeholder="ms">
+									</td>
+									<td>
+										<button class="button-fixed" id="setScBusDataRecordPeriodButton">Set Bus Data Rec. Period</button>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScBusDataRecordPeriodButton">Get Bus Data Rec. Period</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">Bus Data Rec. Period:</div>
+						</td>
+						<td>
+							<input type="text" id="scBusDataRecordPeriodTextbox" placeholder="ms">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+							<table style="width:100%" border ="0">
+								<tr>
+									<td style="width:40%">
+										<input type="text" id="setScPayloadOpPeriodTextbox" placeholder="ms">
+									</td>
+									<td>
+										<button class="button-fixed" id="setScPayloadOpPeriodButton">Set Payload Op Period</button>
+									</td>
+								</tr>
+							</table>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScPayloadOpPeriodButton">Get Payload Op Period</button></center>
+						</td>
+						<td>
+							<div class="right-aligned-text">Payload Op Period:</div>
+						</td>
+						<td>
+							<input type="text" id="scPayloadOpPeriodTextbox" placeholder="ms">
+						</td>
+					</tr>
+					<tr>    
+						<td>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="getScGpsPositionButton">Get GPS Position</button></center>
+						</td>
+						<td>
+						</td>
+						<td>
+						</td>
+					</tr>
+					<tr>    
+						<td>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="performScCutdownButton">Initiate Cutdown</button></center>
+						</td>
+						<td>
+						</td>
+						<td>
+						</td>
+					</tr>
+					<tr>    
+						<td>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="performScRebootButton">Reboot</button></center>
+						</td>
+						<td>
+						</td>
+						<td>
+						</td>
+					</tr>
+					<tr>    
+						<td>
+						</td>
+						<td>
+							<center><button class="button-fixed" id="performScFlashChipEraseButton">Erase Flash Chip</button></center>
+						</td>
+						<td>
+						</td>
+						<td>
+						</td>
+					</tr>					
+				</table>
+			</td>
+			<td>
+				<table style="width:100%" border="2">
+					<tr>
+						<td>
+							<table border="2">
+								<tr>
+									<td>
+										<div class="right-aligned-text">Transmitted Message:</div>
+									</td>
+									<td>
+										<input type="text" style="width:250px" id="gsTransmittedMsgTextbox" placeholder="">
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<div class="right-aligned-text">Received Message:</div>
+									</td>
+									<td>
+										<input type="text" style="width:250px" id="gsReceivedMsgTextbox" placeholder="">
+									</td>
+								</tr>
+								</tr>
+									<td>
+										<div class="right-aligned-text">Received Beacon Message:</div>
+									</td>
+									<td>
+										<input type="text" style="width:250px" id="gsReceivedBeaconMessageTextbox" placeholder="">
+									</td>
+								</tr>									
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p>Raw Message Log</p>
+							<textarea id="gsOutputTextBox" readonly></textarea>
+							<br>
+							<button class="button-fixed" id="gsClearTextButton">Clear Text</button>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+
+	<br>
+	<br>
+	
+	<table style="width:100%" border ="2">
+	<tr>
+		<th style="width:65%">Ground Station LoRa Radio</th>
+		<th style="width:35%">Serial COM Port</th> 
+	</tr>
+	<tr>
+		<td>
+			<table style="width:100%" border ="1">
+				<tr>    
+					<td>
+						<table style="width:100%" border ="2">
+							<tr>
+								<th style="font-family:courier;">GS LoRa Set Commands</th>
+								<th style="font-family:courier;">GS LoRa Get Commands</th>
+								<th></th>
+								<th style="font-family:courier;">GS LoRa Telemetry</th>
+							</tr>
+							<tr>    
+								<td>
+									<center><button class="button-fixed" id="setGsAllLoraDefaultsButton">Set All GS LoRa Defaults</button></center>
+								</td>
+								<td>
+									<center><button class="button-fixed" id="getGsAllLoraTelemetryButton">Get All GS LoRa Tlm.</button></center>
+								</td>
+								<td>
+								</td>
+								<td>
+								</td>
+							</tr>
+							<tr>    
+								<td>
+									<table style="width:100%" border ="0">
+										<tr>
+											<td>
+												<table style="width:100%" border ="0">
+													<tr>
+														<td style="width:40%">
+															<input type="text" id="setGsFrequencyTextbox" placeholder="Hz">
+														</td>
+														<td>
+															<button class="button-fixed" id="setGsFrequencyButton">Set Frequency</button>
+														</td>
+													</tr>
+												</table>
+											</td>
+											<td>
+											</td>
+										</tr>
+									</table>	
+								</td>
+								<td>
+									<center><button class="button-fixed" id="getGsFrequencyButton">Get Frequency</button></center>
+								</td>
+								<td>
+									<div class="right-aligned-text">Frequency:</div>
+								</td>
+								<td>
+									<input type="text" id="gsFrequencyTextbox" placeholder="Hz">
+								</td>
+							</tr>
+							<tr>    
+								<td>
+									<table style="width:100%" border ="0">
+										<tr>
+											<td style="width:40%">
+												<select id="gsBandwidthDropdown">
+													<option>Hz</option>
+												</select>
+											</td>
+											<td>
+												<button class="button-fixed" id="setGsBandwidthButton">Set Bandwidth</button>
+											</td>
+										</tr>
+									</table>									
+									
+								</td>
+								<td>
+									<center><button class="button-fixed" id="getGsBandwidthButton">Get Bandwidth</button></center>
+								</td>
+								<td>
+									<div class="right-aligned-text">Bandwidth:</div>
+								</td>
+								<td>
+									<input type="text" id="gsBandwidthTextbox" placeholder="Hz">
+								</td>
+							</tr>
+							<tr>    
+								<td>
+									<table style="width:100%" border ="0">
+										<tr>
+											<td style="width:40%">
+												<input type="text" id="setGsSpreadFactorTextbox" placeholder="">
+											</td>
+											<td>
+												<button class="button-fixed" id="setGsSpreadFactorButton">Set Spread Factor</button>
+											</td>
+										</tr>
+									</table>								
+								</td>
+								<td>
+									<center><button class="button-fixed" id="getGsSpreadFactorButton">Get Spread Factor</button></center>
+								</td>
+								<td>
+									<div class="right-aligned-text">Spread Factor:</div>
+								</td>
+								<td>
+									<input type="text" id="gsSpreadFactorTextbox" placeholder="">
+								</td>
+							</tr>
+							<tr>    
+								<td>
+									<table style="width:100%" border ="0">
+										<tr>
+											<td style="width:40%">
+												<input type="text" id="setGsCodingRateTextbox" placeholder="">
+											</td>
+											<td>
+												<button class="button-fixed" id="setGsCodingRateButton">Set Coding Rate</button>
+											</td>
+										</tr>
+									</table>								
+								</td>
+								<td>
+									<center><button class="button-fixed" id="getGsCodingRateButton">Get Coding Rate</button></center>
+								</td>
+								<td>
+									<div class="right-aligned-text">Coding Rate:</div>
+								</td>
+								<td>
+									<input type="text" id="gsCodingRateTextbox" placeholder="">
+								</td>
+							</tr>
+							<tr>    
+								<td>
+									<table style="width:100%" border ="0">
+										<tr>
+											<td style="width:40%">
+												<input type="text" id="setGsOutputPowerTextbox" placeholder="dBm">
+											</td>
+											<td>
+												<button class="button-fixed" id="setGsOutputPowerButton">Set Output Power</button>
+											</td>
+										</tr>
+									</table>
+								</td>
+								<td>
+									<center><button class="button-fixed" id="getGsOutputPowerButton">Get Output Power</button></center>
+								</td>
+								<td>
+									<div class="right-aligned-text">Output Power:</div>
+								</td>
+								<td>
+									<input type="text" id="gsOutputPowerTextbox" placeholder="dBm">
+								</td>
+							</tr>
+							<tr>    
+								<td>
+									<table style="width:100%" border ="0">
+										<tr>
+											<td style="width:40%">
+												<input type="text" id="setGsCurrentLimitTextbox" placeholder="mA">
+											</td>
+											<td>
+												<button class="button-fixed" id="setGsCurrentLimitButton">Set Current Limit</button>
+											</td>
+										</tr>
+									</table>
+								</td>
+								<td>
+									<center><button class="button-fixed" id="getGsCurrentLimitButton">Get Current Limit</button></center>
+								</td>
+								<td>
+									<div class="right-aligned-text">Current Limit:</div>
+								</td>
+								<td>
+									<input type="text" id="gsCurrentLimitTextbox" placeholder="mA">
+								</td>
+							</tr>
+							<tr>    
+								<td>
+									<table style="width:100%" border ="0">
+										<tr>
+											<td style="width:40%">
+												<input type="text" id="setGsPreambleLengthTextbox" placeholder="">
+											</td>
+											<td>
+												<button class="button-fixed" id="setGsPreambleLengthButton">Set Preamble Length</button>
+											</td>
+										</tr>
+									</table>
+								</td>
+								<td>
+									<center><button class="button-fixed" id="getGsPreambleLengthButton">Get Preamble Length</button></center>
+								</td>
+								<td>
+									<div class="right-aligned-text">Preamble Length:</div>
+								</td>
+								<td>
+									<input type="text" id="gsPreambleLengthTextbox" placeholder="">
+								</td>
+							</tr>
+							<tr>    
+								<td>
+									<table style="width:100%" border ="0">
+										<tr>
+											<td style="width:40%">
+												<input type="text" id="setGsGainTextbox" placeholder="">
+											</td>
+											<td>
+												<button class="button-fixed" id="setGsGainButton">Set Gain</button>
+											</td>
+										</tr>
+									</table>
+								</td>
+								<td>
+									<center><button class="button-fixed" id="getGsGainButton">Get Gain</button></center>
+								</td>
+								<td>
+									<div class="right-aligned-text">Gain:</div>
+								</td>
+								<td>
+									<input type="text" id="gsGainTextbox" placeholder="">
+								</td>
+							</tr>
+							<tr>    
+								<td>
+								</td>
+								<td>
+									<center><button class="button-fixed" id="getGsFrequencyErrorButton">Get Frequency Error</button></center>
+								</td>
+								<td>
+									<div class="right-aligned-text">Frequency Error:</div>
+								</td>
+								<td>
+									<input type="text" id="gsFrequencyErrorTextbox" placeholder="Hz">
+								</td>
+							</tr>
+							<tr>    
+								<td>
+								</td>
+								<td>
+									<center><button class="button-fixed" id="getGsSnrButton">Get SNR</button></center>
+								</td>
+								<td>
+									<div class="right-aligned-text">SNR:</div>
+								</td>
+								<td>
+									<input type="text" id="gsSnrTextbox" placeholder="">
+								</td>
+							</tr>
+							<tr>    
+								<td>
+								</td>
+								<td>
+									<center><button class="button-fixed" id="getGsRssiButton">Get RSSI</button></center>
+								</td>
+								<td>
+									<div class="right-aligned-text">RSSI:</div>
+								</td>
+								<td>
+									<input type="text" id="gsRssiTextbox" placeholder="">
+								</td>
+							</tr>
+						</table>	
+					</td>
+				</tr>
+			</table>
+		</td>    
+		<td>
+			<table style="width:100%" border ="1">
+				<tr>    
+					<td>
+						<table style="width:50%" border ="2">
+							<tr>    
+								<td colspan="4">
+									<button class="button-fixed" id="getAvailSerialPortsButton">Get Avail Serial Ports</button>
+								</td>
+							</tr>
+							<tr>
+								<th>Serial Port</th>
+								<th>Data Rate</th>
+								<th>Port Control</th>
+								<th>Port Status</th>
+							</tr>
+							<tr>
+								<td>
+									<select id="serialPortDropdown">
+										<option>Serial Ports</option>
+									</select>
+								</td>	
+								<td>
+									<select id="serialPortDataRatesDropdown">
+										<option>Serial Port Data Rates</option>
+									</select>
+								</td>
+								<td>
+									<button class="button-fixed" id="openSerialPortButton">Open Serial Port</button>
+									<button class="button-fixed" id="closeSerialPortButton">Close Serial Port</button>
+								</td>
+								<td>
+									<input type="text" id="serialPortStatus" placeholder="Closed">
+								</td>
+							</tr>
+						</table>	
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</body>
+</html>
